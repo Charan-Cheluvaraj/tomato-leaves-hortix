@@ -1,76 +1,71 @@
-# Hortix Intelligence OS 🌿
-### *High-Fidelity AI Plant Pathology HUD*
+# Smart Crop Disease Detection & Advisory System (Hortix Intelligence OS) 🌿
 
-Hortix is a cinematic, hardware-accelerated intelligence dashboard designed for real-time diagnosis and interactive advisory of tomato leaf diseases. By fusing advanced deep learning (TensorFlow) with Large Language Models (Google Gemini), Hortix transforms raw diagnostic data into a tactical, interactive experience for precision agriculture.
+Hortix is a high-fidelity, real-world AI ecosystem designed to assist farmers in detecting plant diseases and receiving actionable agricultural guidance. This project integrates custom-trained deep learning models with advanced Large Language Models (Gemini) to provide a complete diagnostic and advisory experience.
+
+---
+
+## 🚀 1. Machine Learning Model (MANDATORY)
+
+The system utilizes a dedicated neural network trained specifically for plant pathology detection.
+
+- **Model Architecture**: **Transfer Learning** using **MobileNetV2**.
+  - We leverage the pre-trained weights from ImageNet for feature extraction.
+  - Custom top layers include `GlobalAveragePooling2D`, a `Dense` layer of 128 units (ReLU), and a `Softmax` output layer corresponding to the number of disease classes.
+- **Dataset**: Integrated with datasets like **PlantVillage**, covering various tomato leaf conditions (e.g., Early Blight, Late Blight, Target Spot, Healthy).
+- **Preprocessing Pipeline**:
+  - Image Rescaling (1./255).
+  - **Data Augmentation**: Rotation, width/height shifts, and horizontal flips to ensure model robustness in varied field lighting conditions.
+  - Validation Split: 80/20 train-validation ratio.
+- **Output**: The model returns the predicted disease name and a confidence score (e.g., `Confidence: 0.94`).
+
+## 🧠 2. LLM Integration (Gemini API)
+
+Once the ML model performs the primary diagnosis, the result is passed to the **Google Gemini API** to generate high-value agricultural intelligence.
+
+- **Dynamic Advisory**: Gemini translates technical disease names into localized, simple language for farmers.
+- **Actionable Insights**: The system generates:
+  - **Disease Explanation**: Simple terms describing the condition.
+  - **Remedies**: Practical, immediate steps to treat the crop.
+  - **Preventive Measures**: Long-term strategies to avoid recurrence.
+- **Prompt Engineering**: We use structured prompts that ensure the response is concise, practical, and farmer-centric.
+
+## 💻 3. Frontend (Working Prototype)
+
+The user interface is a cinematic **Intelligence HUD** built with Vanilla HTML/CSS/JS for maximum performance and visual fidelity.
+
+- **Core UI Features**:
+  - **Live Image Upload**: Drag-and-drop or click-to-upload interface.
+  - **Diagnostic Portal**: Displays the ML-detected disease and confidence score immediately.
+  - **Tactical Advice Panel**: Streams the AI-generated report using **Skeleton Shimmer Loading** to maintain a smooth user experience during inference.
+
+## 💬 4. Interactive AI Queries (IMPORTANT)
+
+Hortix features a persistent **Interactive Query Portal** allowing users to ask follow-up questions dynamically.
+
+- **Context-Aware Chat**: Users can ask specific questions like *"How can I prevent it?"* or *"What chemicals should I avoid?"*.
+- **Suggested Actions**: Clickable tactical chips for common follow-ups:
+  - *"What is this disease?"*
+  - *"How can I treat it?"*
+  - *"How can I prevent it?"*
+
+## 🔄 5. System Flow (IMPORTANT)
+
+The operation of Hortix follows a strict, logical pipeline:
+
+1.  **Image → ML Model**: The user uploads a leaf image. The backend pre-processes the image into a 224x224 tensor and feeds it to the **MobileNetV2** model.
+2.  **ML Model → Prediction**: The model predicts the class with the highest probability. If the confidence is high, it proceed to the intelligence phase.
+3.  **Prediction → LLM**: The predicted class (e.g., "Tomato Late Blight") is injected into an instruction-tuned prompt sent to Gemini.
+4.  **LLM → Response**: Gemini streams the agricultural advice (explanation, remedies, prevention) back to the client via SSE (Server-Sent Events).
+5.  **UI Interaction**: The frontend manages the state, displaying skeleton loaders, rendering the streaming text, and enabling follow-up chat capabilities.
 
 ---
 
-## ✨ Key Features
+## 🛠 Technical Expectations & Checklist
 
-- **Cinematic Intelligence HUD**: A high-end dashboard inspired by industrial brutalism and modern terminal aesthetics, featuring a responsive tactical grid.
-- **Micro-Inference System**: Real-time leaf scanning utilizing optimized neural networks for precise disease classification.
-- **Interactive AI Advisory**: A persistent chat portal powered by Gemini Flash allows users to ask follow-up questions about treatments, prevention, and localized care.
-- **Hardware-Accelerated UI**: Custom Gleam/Shimmer skeleton loaders provide a seamless experience during LLM inference, ensuring zero-latency "perceived" interaction.
-- **Global HUD Fluidity**: Optimized flex-box architecture ensures all interactive elements (Suggested Questions, Chat Input) remain accessible via global tactical scrolling.
-
-## 🛠 Tech Stack
-
-- **Frontend**: 
-  - Vanilla JavaScript (ES6+) for logic.
-  - High-End CSS3 with GPU-accelerated animations and glassmorphism.
-  - Custom cinematic scroll-management.
-- **Backend**: 
-  - **FastAPI**: Asynchronous, high-performance API core.
-  - **TensorFlow/Keras**: Deep learning engine for leaf pathology classification.
-  - **Google Gemini API**: Dynamic intelligence layer for streaming advisory reports.
-- **Communication**: SSE (Server-Sent Events) for real-time streaming of AI insights.
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Python 3.9+**
-- **Google AI (Gemini) API Key** (Accessible via [Google AI Studio](https://aistudio.google.com/))
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/Charan-Cheluvaraj/tomato-leaves-hortix.git
-   cd tomato-leaves-hortix
-   ```
-
-2. **Set up your environment**:
-   Create a `.env` file or export your Gemini API key:
-   ```bash
-   NEW_GEMINI_KEY=your_gemini_api_key_here
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Launch the Intelligence OS**:
-   ```bash
-   python main.py
-   ```
-
-5. **Initialize HUD**:
-   Open your browser and navigate to `http://localhost:8000`.
-
-## 📂 Project Structure
-
-- `main.py`: The central Intelligence server, managing inference routes and AI streaming.
-- `static/`: High-fidelity dashboard assets.
-  - `app.js`: HUD lifecycle and interaction management.
-  - `styles.css`: The cinematic aesthetic engine.
-  - `index.html`: The structural foundation of the Tactical Grid.
-- `models/`: Directory containing pre-trained `.h5` neural network weights.
-- `train_model.py`: Training pipeline for expanding the Hortix knowledge base with new plant classes.
-
-## 🤝 Contributing
-
-Contributions to the Hortix Intelligence core are welcome. To maintain the project's visual standards, ensure all UI modifications adhere to the established industrial aesthetic and maintain 60fps interaction fidelity.
+- [x] **Working ML Model**: Custom-trained using TensorFlow (not a third-party detection API).
+- [x] **Clean Integration**: Seamless handoff from ML classification to LLM advisory.
+- [x] **No Hardcoded Outputs**: Every response is generated dynamically based on the specific scan result.
+- [x] **Interactive Interface**: Fully functional follow-up chat portal.
 
 ---
-*Built with ❤️ for sustainable agriculture and precision farming.*
+*Built for the future of sustainable agriculture.*
