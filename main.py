@@ -6,14 +6,41 @@ import numpy as np
 import tensorflow as tf
 import google.generativeai as genai
 
-# Define a patched BatchNormalization to handle legacy arguments
+# Utility to clean up legacy layer configs from TF 2.x
+def clean_config(config):
+    for key in ["renorm", "renorm_clipping", "renorm_momentum", "synchronized", "quantization_config"]:
+        config.pop(key, None)
+    return config
+
 class PatchedBatchNormalization(tf.keras.layers.BatchNormalization):
     @classmethod
     def from_config(cls, config):
-        # Remove legacy arguments that cause Keras 3 to crash
-        for key in ["renorm", "renorm_clipping", "renorm_momentum", "synchronized"]:
-            config.pop(key, None)
-        return super().from_config(config)
+        return super().from_config(clean_config(config))
+
+class PatchedDense(tf.keras.layers.Dense):
+    @classmethod
+    def from_config(cls, config):
+        return super().from_config(clean_config(config))
+
+class PatchedConv2D(tf.keras.layers.Conv2D):
+    @classmethod
+    def from_config(cls, config):
+        return super().from_config(clean_config(config))
+
+class PatchedMaxPooling2D(tf.keras.layers.MaxPooling2D):
+    @classmethod
+    def from_config(cls, config):
+        return super().from_config(clean_config(config))
+        
+class PatchedDropout(tf.keras.layers.Dropout):
+    @classmethod
+    def from_config(cls, config):
+        return super().from_config(clean_config(config))
+
+class PatchedFlatten(tf.keras.layers.Flatten):
+    @classmethod
+    def from_config(cls, config):
+        return super().from_config(clean_config(config))
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -99,10 +126,17 @@ CLASS_NAMES_PATH = 'models/class_names.json'
 IMG_SIZE = (224, 224)
 
 print("Initializing Neural Core...")
-# Load with the patched layer and compile=False for maximum compatibility
+# Load with the patched layers and compile=False for maximum compatibility
 model = tf.keras.models.load_model(
     MODEL_PATH, 
-    custom_objects={'BatchNormalization': PatchedBatchNormalization},
+    custom_objects={
+        'BatchNormalization': PatchedBatchNormalization,
+        'Dense': PatchedDense,
+        'Conv2D': PatchedConv2D,
+        'MaxPooling2D': PatchedMaxPooling2D,
+        'Dropout': PatchedDropout,
+        'Flatten': PatchedFlatten
+    },
     compile=False
 )
 
