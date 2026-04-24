@@ -129,8 +129,8 @@ MONITORING: Continue bi-weekly visual inspections for aphids or early fungal sig
 }
 
 # --- System Setup ---
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/vids", StaticFiles(directory="vids"), name="vids")
+# --- Neural Core Initialization ---
+# Static files will be mounted at the end to avoid route interference.
 
 MODEL_PATH = 'models/plant_model.h5'
 CLASS_NAMES_PATH = 'models/class_names.json'
@@ -210,9 +210,7 @@ async def stream_gemini_advice(disease_name: str):
 
 # --- API Endpoints ---
 
-@app.get("/")
-async def root():
-    return FileResponse("static/index.html")
+# Note: UI is served via StaticFiles mount at the bottom.
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -270,6 +268,11 @@ async def chat(request: ChatRequest):
             yield "\n\n[COMMUNICATION ERROR] AI recalibration required. Local diagnostics recommend checking irrigation patterns and soil pH in the meantime."
 
     return StreamingResponse(chat_stream(), media_type="text/plain")
+
+
+# Finally, mount static files at root
+# This serves index.html and its relative assets (styles.css, app.js, vids/)
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
