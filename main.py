@@ -89,7 +89,7 @@ CLASS_NAMES_PATH = 'models/class_names.json'
 IMG_SIZE = (224, 224)
 
 print("Initializing Neural Core...")
-model = tf.keras.models.load_model(MODEL_PATH)
+model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 with open(CLASS_NAMES_PATH, 'r') as f:
     class_names = json.load(f)
