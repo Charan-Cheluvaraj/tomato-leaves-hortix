@@ -5,7 +5,14 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Phase 0: State Management ---
+    // --- Phase 0: Configuration & State ---
+    const CONFIG = {
+        // Replace with your Render URL when deploying to Vercel
+        API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? '' 
+            : 'https://tomato-leaves-hortix.onrender.com' 
+    };
+
     const state = {
         selectedFile: null,
         detectedDisease: null,
@@ -218,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Step 2: Inference (FAST)
             updateFlowStep('INFERENCE', 'active');
-            const response = await fetch('/predict', {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/predict`, {
                 method: 'POST',
                 body: formData
             });
@@ -242,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.chatMessages.innerHTML = '';
             
             // Initiate Streaming Advice
-            const adviceResponse = await fetch(`/advice?disease_name=${encodeURIComponent(data.disease_name)}`);
+            const adviceResponse = await fetch(`${CONFIG.API_BASE_URL}/advice?disease_name=${encodeURIComponent(data.disease_name)}`);
             const reader = adviceResponse.body.getReader();
             const decoder = new TextDecoder();
             
@@ -354,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aiMessageDiv.appendChild(pulse);
 
         try {
-            const response = await fetch('/chat', {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

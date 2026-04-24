@@ -43,7 +43,7 @@ class PatchedFlatten(tf.keras.layers.Flatten):
         return super().from_config(clean_config(config))
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from PIL import Image
@@ -52,8 +52,19 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # Initialize FastAPI
 app = FastAPI(title="Hortix Intelligence OS")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For production, replace with your Vercel URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- Configuration & Environment ---
 # Key is now loaded from .env file (secured and ignored by git)
@@ -201,7 +212,7 @@ async def stream_gemini_advice(disease_name: str):
 
 @app.get("/")
 async def root():
-    return {"status": "ONLINE", "version": "2.1.0"}
+    return FileResponse("static/index.html")
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
