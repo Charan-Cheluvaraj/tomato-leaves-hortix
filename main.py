@@ -4,14 +4,17 @@ import io
 import asyncio
 import numpy as np
 import tensorflow as tf
-
-# Keras 3 (TF 2.16+) compatibility: Try to use the legacy tf-keras if installed
-try:
-    import tf_keras as keras
-except ImportError:
-    from tensorflow import keras
-
 import google.generativeai as genai
+
+# Define a patched BatchNormalization to handle legacy arguments
+class PatchedBatchNormalization(tf.keras.layers.BatchNormalization):
+    @classmethod
+    def from_config(cls, config):
+        # Remove legacy arguments that cause Keras 3 to crash
+        for key in ["renorm", "renorm_clipping", "renorm_momentum", "synchronized"]:
+            config.pop(key, None)
+        return super().from_config(config)
+
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -96,7 +99,12 @@ CLASS_NAMES_PATH = 'models/class_names.json'
 IMG_SIZE = (224, 224)
 
 print("Initializing Neural Core...")
-model = keras.models.load_model(MODEL_PATH, compile=False)
+# Load with the patched layer and compile=False for maximum compatibility
+model = tf.keras.models.load_model(
+    MODEL_PATH, 
+    custom_objects={'BatchNormalization': PatchedBatchNormalization},
+    compile=False
+)
 
 with open(CLASS_NAMES_PATH, 'r') as f:
     class_names = json.load(f)
