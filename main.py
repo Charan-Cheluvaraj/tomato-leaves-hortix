@@ -10,14 +10,21 @@ from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from PIL import Image
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize FastAPI
 app = FastAPI(title="Hortix Intelligence OS")
 
 # --- Configuration & Environment ---
-# Using the NEW API KEY provided by the user
-NEW_GEMINI_KEY = "AIzaSyALBPPqxJvmXyVZ7YJEMTufWD56bczM7gw"
-genai.configure(api_key=NEW_GEMINI_KEY)
+# Key is now loaded from .env file (secured and ignored by git)
+NEW_GEMINI_KEY = os.getenv("NEW_GEMINI_KEY")
+if not NEW_GEMINI_KEY:
+    print("WARNING: NEW_GEMINI_KEY not found in environment. AI features will fail.")
+else:
+    genai.configure(api_key=NEW_GEMINI_KEY)
 
 # Models to attempt in order of preference
 # DISCOVERY: Diagnostic script found 'gemini-3.1-flash-live-preview' and 'gemini-2.5-flash-native-audio-preview-12-2025'
