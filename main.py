@@ -4,6 +4,13 @@ import io
 import asyncio
 import numpy as np
 import tensorflow as tf
+
+# Keras 3 (TF 2.16+) compatibility: Try to use the legacy tf-keras if installed
+try:
+    import tf_keras as keras
+except ImportError:
+    from tensorflow import keras
+
 import google.generativeai as genai
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -89,7 +96,7 @@ CLASS_NAMES_PATH = 'models/class_names.json'
 IMG_SIZE = (224, 224)
 
 print("Initializing Neural Core...")
-model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+model = keras.models.load_model(MODEL_PATH, compile=False)
 
 with open(CLASS_NAMES_PATH, 'r') as f:
     class_names = json.load(f)
